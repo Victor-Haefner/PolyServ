@@ -1,0 +1,21 @@
+How to use this TURN server:
+
+First register as a user
+
+	regUser.php?NAME=bob
+
+This will return your user ID
+Get a list of the other users
+
+	listUsers.php
+
+Choose a user, remember his UID
+Then get a TCP connection
+
+	getConnection.php?UID=yourUID&UID2=othersUID
+
+This will make the server listen on a port, the addr:port will be returned
+Connect to the server over tcp using the addr:port
+Wait for the other user to connect to the session, 
+you will be notified over the tcp connection by a "conection established with $UID"
+
