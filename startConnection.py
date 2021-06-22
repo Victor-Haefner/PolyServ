@@ -2,6 +2,7 @@
 
 import socket, sys
 import threading
+from time import sleep
 
 def log(msg, doAppend = True):
 	if doAppend: f = open('logs/log.txt', 'a')
@@ -24,7 +25,9 @@ log(' client 2 on: '+uri2)
 port1 = int(uri1.split(':')[1])
 port2 = int(uri2.split(':')[1])
 
-def startConnection(port):
+connectionMap = {}
+
+def startConnection(port, port2):
 	log(' start socket on port: '+str(port))
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.bind(('localhost', port))
@@ -32,11 +35,17 @@ def startConnection(port):
 
 	while True:
 		connection, client_address = sock.accept()
+		connectionMap[port] = connection
+		sleep(1)
 
 		try:
 			while True: # Receive the data in small chunks and retransmit it
-				data = connection.recv(16)
-				if data: connection.sendall(data)
+				data = connection.recv(256)
+				if data: 
+					log(' got "'+data+'" on port: '+str(port))
+					if port2 in connectionMap: 
+						log('  send "'+data+'" to port: '+str(port2))
+						connectionMap[port2].sendall(data)
 				else: break
             
 		finally:
@@ -44,8 +53,8 @@ def startConnection(port):
 			log(' connection closed on '+str(port))
 			return # comment if necessary to resume broken connections
 
-t1 = threading.Thread(target=startConnection, args=(port1,))
-t2 = threading.Thread(target=startConnection, args=(port2,))
+t1 = threading.Thread(target=startConnection, args=(port1, port2,))
+t2 = threading.Thread(target=startConnection, args=(port2, port1,))
 
 t1.start()
 t2.start()
