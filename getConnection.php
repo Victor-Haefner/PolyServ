@@ -37,7 +37,8 @@ if (file_exists("$SESDIR/$uid2-$uid")) { // case 2
 
 	// start TCP listeners
 	$arg = escapeshellarg($sessionFile);
-	exec("php startConnection.php $arg > /dev/null &"); 
+	//exec("php startConnection.php $arg > /dev/null &"); 
+	exec("python startConnection.py $arg > /dev/null &"); 
 	sleep(1);
 	print "$uri1:case1:$uri2";
 }

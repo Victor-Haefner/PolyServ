@@ -2,6 +2,8 @@
 
 import requests
 import socket
+import threading
+from time import sleep
 
 server = 'http://localhost/PolyServ'
 
@@ -27,24 +29,36 @@ addr1 = data.content
 data = requests.get(server+'/getConnection.php?UID='+uid2+'&UID2='+uid1)
 addr2 = data.content
 
-def startTCP(addr, msg):
+doStop = False
+socketList = []
+
+def startTCP(addr, name, msg):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	socketList.append(sock)
 	a,p = addr.split(':')[:2]
 	p = int(p)
 	print 'connect', a, p, ', data:', addr
 	sock.connect((a,p))
 	sock.send(msg)
-	return sock
 
-sock1 = startTCP(addr1, "message from cli1")
-#sock2 = startTCP(addr2, "message from cli2")
+	while not doStop:
+		data = sock.recv(256)
+		if data and data: print 'received from sock'+name+': ', data
+		else: break
 
-count = 0
-while count < 10:
-	data = sock1.recv(256)
-	print 'received from sock1: ', data
-	#data = sock2.recv(256)
-	#print 'received from sock2: ', data
-	count += 1
+t1 = threading.Thread(target=startTCP, args=(addr1, "1", "message from cli1",))
+t2 = threading.Thread(target=startTCP, args=(addr2, "2", "message from cli2",))
+t1.start()
+t2.start()
+sleep(5)
+doStop = True
+for s in socketList: s.shutdown(socket.SHUT_WR)
+t1.join()
+t2.join()
+print ' done'
 
-#localhost/PolyServ/getConnection.php?UID=a&UID2=b
+
+
+
+
+
