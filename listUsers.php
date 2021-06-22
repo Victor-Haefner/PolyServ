@@ -12,7 +12,9 @@ foreach ($files as &$file) {
 	if ($file == ".keep") continue;
 
 	$data = file("$USRDIR/$file");
-	print "$data[0], $data[1]; ";
+	$name = rtrim($data[0]);
+	$uid = rtrim($data[1]);
+	print "$name|$uid\n";
 }
 
 ?>
