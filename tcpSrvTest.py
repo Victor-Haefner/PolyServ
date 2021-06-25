@@ -2,11 +2,11 @@
 
 import socket
 
-p = 5502
+p = 4020
 msg = 'hello client!'
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.bind(('localhost', p))
+sock.bind(('0.0.0.0', p))
 sock.listen(1)
 
 c, a = sock.accept()
