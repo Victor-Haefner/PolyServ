@@ -2,8 +2,8 @@
 
 import socket
 
-a = 'localhost'#'141.3.151.224'
-p = 5502
+a = 'localhost'
+p = 4020
 msg = 'hello server!'
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

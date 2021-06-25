@@ -9,6 +9,21 @@ $uid2 = $_GET['UID2'];
 //  case 1: this is the first user connecting
 //  case 2: this is the second user connecting
 
+function findPort($x1, $x2) {
+	ini_set('display_errors', '0');
+	ini_set('display_startup_errors', '0');
+	error_reporting(E_NONE);
+
+	for ($x = $x1; $x <= $x2; $x++) {
+		$sock = socket_create_listen($x) > null;
+		if ($sock) {
+			socket_close($sock);
+			return $x;
+		}
+	}
+	return 0;
+}
+
 // check case
 if (file_exists("$SESDIR/$uid2-$uid")) { // case 2
 	sleep(1);
@@ -20,27 +35,20 @@ if (file_exists("$SESDIR/$uid2-$uid")) { // case 2
 	print "$uri2:case2:$uri1";
 } else { // case 1
 	// get free ports
-	$sock = socket_create_listen(0);
-	socket_getsockname($sock, $addr, $port);
-	socket_close($sock);
-	$uri1 = "$addr:$port";
-	$sock = socket_create_listen(0);
-	socket_getsockname($sock, $addr, $port);
-	socket_close($sock);
-	$uri2 = "$addr:$port";
+	$port1 = findPort(4020, 4035);
+	$port2 = findPort(4036, 4050);
 
 	// create session
 	$sessionFile = "$uid-$uid2";
 	$now = time();
-	$data = "$uid\n$uid2\n$uri1\n$uri2\n$now";
+	$data = "$uid\n$uid2\n$port1\n$port2\n$now";
 	file_put_contents("$SESDIR/$sessionFile", $data);
 
 	// start TCP listeners
-	$arg = escapeshellarg($sessionFile);
-	//exec("php startConnection.php $arg > /dev/null &"); 
-	exec("python startConnection.py $arg > /dev/null &"); 
+	$arg1 = escapeshellarg($sessionFile);
+	exec("python startConnection.py $arg1 > /dev/null &"); 
 	sleep(1);
-	print "$uri1:case1:$uri2";
+	print "$port1:case1:$port2";
 }
 
 ?>

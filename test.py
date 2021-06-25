@@ -5,7 +5,9 @@ import socket
 import threading
 from time import sleep
 
+
 server = 'http://localhost/PolyServ'
+tcpserv = 'localhost'
 
 # get registred users
 users = {}
@@ -35,10 +37,10 @@ socketList = []
 def startTCP(addr, name, msg):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	socketList.append(sock)
-	a,p = addr.split(':')[:2]
-	p = int(p)
-	print 'connect', a, p, ', data:', addr
-	sock.connect((a,p))
+	port = addr.split(':')[0]
+	print 'connect', tcpserv, port, ', data:', addr
+	port = int(port)
+	sock.connect((tcpserv,port))
 	sock.send(msg)
 
 	while not doStop:

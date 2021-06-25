@@ -11,26 +11,31 @@ def log(msg, doAppend = True):
 	f.close()
 
 sessionFile = sys.argv[1]
+serverIP = '0.0.0.0'
 
 f = open('sessions/'+sessionFile, 'r')
 data = f.readlines()
 f.close()
-uri1 = data[2][:-1]
-uri2 = data[3][:-1]
+port1 = data[2][:-1]
+port2 = data[3][:-1]
 
 log('start session '+sessionFile, False)
-log(' client 1 on: '+uri1)
-log(' client 2 on: '+uri2)
+log(' client 1 on: '+port1)
+log(' client 2 on: '+port2)
 
-port1 = int(uri1.split(':')[1])
-port2 = int(uri2.split(':')[1])
+port1 = int(port1)
+port2 = int(port2)
 
 connectionMap = {}
 
 def startConnection(port, port2):
-	log(' start socket on port: '+str(port))
+	log(' start socket on: '+serverIP+':'+str(port))
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock.bind(('localhost', port))
+    	sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+	try:
+		sock.bind((serverIP, port))
+	except:
+		log('  bind socket on '+str(port)+' failed!')
 	sock.listen(1)
 
 	while True:
