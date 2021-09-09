@@ -7,5 +7,6 @@ error_reporting(E_ALL);
 $USRDIR = "users";
 $SESDIR = "sessions";
 $LOGDIR = "logs";
+$MSGDIR = "messages";
 
 ?>
