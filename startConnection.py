@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import socket, sys
+import socket, sys, os
 import threading
 from time import sleep
 
@@ -66,5 +66,7 @@ t2.start()
 t1.join()
 t2.join()
 log('  done')
+os.remove('sessions/'+sessionFile)
+
 
 	
