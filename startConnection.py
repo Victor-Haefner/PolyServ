@@ -41,7 +41,7 @@ def startConnection(port, port2):
 	while True:
 		connection, client_address = sock.accept()
 		connectionMap[port] = connection
-		sleep(1)
+		sleep(0.2)
 
 		try:
 			while True: # Receive the data in small chunks and retransmit it
