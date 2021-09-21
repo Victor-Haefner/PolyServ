@@ -26,12 +26,12 @@ function findPort($x1, $x2) {
 
 // check case
 if (file_exists("$SESDIR/$uid2-$uid")) { // case 2
-	sleep(1);
+	//sleep(1);
 	$sessionFile = "$uid2-$uid";
 	$data = file("$SESDIR/$sessionFile");
 	$uri1 = rtrim($data[2]);
 	$uri2 = rtrim($data[3]);
-	sleep(1);
+	//sleep(1);
 	print "$uri2:case2:$uri1";
 } else { // case 1
 	// get free ports
@@ -47,7 +47,7 @@ if (file_exists("$SESDIR/$uid2-$uid")) { // case 2
 	// start TCP listeners
 	$arg1 = escapeshellarg($sessionFile);
 	exec("python startConnection.py $arg1 > /dev/null &"); 
-	sleep(1);
+	//sleep(1);
 	print "$port1:case1:$port2";
 }
 
