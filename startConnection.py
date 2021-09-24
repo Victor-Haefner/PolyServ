@@ -5,21 +5,27 @@ import threading
 from time import sleep
 
 def log(msg, doAppend = True):
-	if doAppend: f = open('logs/log.txt', 'a')
-	else: f = open('logs/log.txt', 'w')
+	if doAppend: f = open('logs/pylog.txt', 'a')
+	else: f = open('logs/pylog.txt', 'w')
 	f.write(msg+'\n')
 	f.close()
 
 sessionFile = sys.argv[1]
 serverIP = '0.0.0.0'
 
-f = open('sessions/'+sessionFile, 'r')
+log('py, start session '+sessionFile, False)
+
+try:
+	f = open('sessions/'+sessionFile, 'r')
+except:
+	log('  session file "'+'sessions/'+sessionFile+'" could not be opened!')
+	exit(0)
+
 data = f.readlines()
 f.close()
 port1 = data[2][:-1]
 port2 = data[3][:-1]
 
-log('start session '+sessionFile, False)
 log(' client 1 on: '+port1)
 log(' client 2 on: '+port2)
 
@@ -37,6 +43,7 @@ def startConnection(port, port2):
 	except:
 		log('  bind socket on '+str(port)+' failed!')
 	sock.listen(1)
+	log('  start listening')
 
 	while True:
 		connection, client_address = sock.accept()
