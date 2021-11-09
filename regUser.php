@@ -1,6 +1,7 @@
 <?php
 
 include 'utils.php';
+include 'cleanupUsers.php';
 
 $name = $_GET['NAME'];
 $uid = uniqid();
