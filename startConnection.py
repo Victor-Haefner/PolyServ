@@ -39,6 +39,27 @@ connectionMap = {}
 acceptTimeout = 5*60 # 5 min
 recvTimeout = 5*60 # 5 min
 
+def getSessionRefCount(userFile):
+        f = open(userFile)
+        data = f.readlines()
+        data = [ d[:-1] for d in data ]
+	f.close()
+        return int(data[3])
+
+def incrementSessionRefs(userFile):
+	f = open(userFile, 'r')
+	data = f.readlines()
+	data = [ d[:-1] for d in data ]
+	data[3] = str(int(data[3])+1)
+	f.close()
+
+	f = open(userFile, 'w')
+	f.writelines(data)
+	f.close()
+
+incrementSessionRefs('users/'+user1)
+incrementSessionRefs('users/'+user2)
+
 def startConnection(port, port2):
 	log(' start socket on: '+serverIP+':'+str(port))
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -86,7 +107,7 @@ t1.join()
 t2.join()
 log('  done')
 os.remove('sessions/'+sessionFile)
-# Don't remove users here! they may be in other sessions
-#os.remove('users/'+user1)
-#os.remove('users/'+user2)
+
+if getSessionRefCount('users/'+user1) == 1: os.remove('users/'+user1)
+if getSessionRefCount('users/'+user2) == 1: os.remove('users/'+user2)
 	
