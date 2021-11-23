@@ -47,18 +47,26 @@ def getSessionRefCount(userFile):
         return int(data[3])
 
 def incrementSessionRefs(userFile):
+	log('inc ref count')
 	f = open(userFile, 'r')
+	log(' inc2')
 	data = f.readlines()
+	log(' inc2')
 	data = [ d[:-1] for d in data ]
+	log(' inc2')
 	data[3] = str(int(data[3])+1)
+	log(' inc2')
 	f.close()
+	log(' inc2')
 
 	f = open(userFile, 'w')
 	f.writelines(data)
 	f.close()
+	log(' inc3')
 
-incrementSessionRefs('users/'+user1)
-incrementSessionRefs('users/'+user2)
+
+#incrementSessionRefs('users/'+user1)
+#incrementSessionRefs('users/'+user2)
 
 def startConnection(port, port2):
 	log(' start socket on: '+serverIP+':'+str(port))
