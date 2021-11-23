@@ -5,6 +5,7 @@ import threading
 from time import sleep
 
 def log(msg, doAppend = True):
+	print msg
 	if doAppend: f = open('logs/pylog.txt', 'a')
 	else: f = open('logs/pylog.txt', 'w')
 	f.write(msg+'\n')
@@ -42,31 +43,34 @@ recvTimeout = 5*60 # 5 min
 def getSessionRefCount(userFile):
         f = open(userFile)
         data = f.readlines()
-        data = [ d[:-1] for d in data ]
 	f.close()
         return int(data[3])
 
 def incrementSessionRefs(userFile):
 	log('inc ref count')
 	f = open(userFile, 'r')
-	log(' inc2')
 	data = f.readlines()
-	log(' inc2')
-	data = [ d[:-1] for d in data ]
-	log(' inc2')
 	data[3] = str(int(data[3])+1)
-	log(' inc2')
 	f.close()
-	log(' inc2')
 
 	f = open(userFile, 'w')
 	f.writelines(data)
 	f.close()
-	log(' inc3')
+
+def decrementSessionRefs(userFile):
+        log('inc ref count')
+        f = open(userFile, 'r')
+        data = f.readlines()
+        data[3] = str(int(data[3])-1)
+        f.close()
+
+        f = open(userFile, 'w')
+        f.writelines(data)
+        f.close()
 
 
-#incrementSessionRefs('users/'+user1)
-#incrementSessionRefs('users/'+user2)
+incrementSessionRefs('users/'+user1)
+incrementSessionRefs('users/'+user2)
 
 def startConnection(port, port2):
 	log(' start socket on: '+serverIP+':'+str(port))
@@ -116,6 +120,7 @@ t2.join()
 log('  done')
 os.remove('sessions/'+sessionFile)
 
-if getSessionRefCount('users/'+user1) == 1: os.remove('users/'+user1)
-if getSessionRefCount('users/'+user2) == 1: os.remove('users/'+user2)
-	
+if getSessionRefCount('users/'+user1) <= 1: os.remove('users/'+user1)
+else: decrementSessionRefs('users/'+user1)
+if getSessionRefCount('users/'+user2) <= 1: os.remove('users/'+user2)
+else: decrementSessionRefs('users/'+user2)
