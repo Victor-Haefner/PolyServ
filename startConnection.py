@@ -23,6 +23,8 @@ except:
 
 data = f.readlines()
 f.close()
+user1 = data[0][:-1]
+user2 = data[1][:-1]
 port1 = data[2][:-1]
 port2 = data[3][:-1]
 
@@ -84,6 +86,7 @@ t1.join()
 t2.join()
 log('  done')
 os.remove('sessions/'+sessionFile)
-
-
+# Don't remove users here! they may be in other sessions
+#os.remove('users/'+user1)
+#os.remove('users/'+user2)
 	
