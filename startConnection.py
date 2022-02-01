@@ -28,12 +28,17 @@ user1 = data[0][:-1]
 user2 = data[1][:-1]
 port1 = data[2][:-1]
 port2 = data[3][:-1]
+tnow  = data[4][:-1]
+port3 = data[5][:-1]
+port4 = data[6][:-1]
 
-log(' client 1 on: '+port1)
-log(' client 2 on: '+port2)
+log(' client 1 on: '+port1+' '+port3)
+log(' client 2 on: '+port2+' '+port4)
 
 port1 = int(port1)
 port2 = int(port2)
+port3 = int(port3)
+port4 = int(port4)
 
 connectionMap = {}
 
@@ -112,11 +117,17 @@ def startConnection(port, port2):
 
 t1 = threading.Thread(target=startConnection, args=(port1, port2,))
 t2 = threading.Thread(target=startConnection, args=(port2, port1,))
+t3 = threading.Thread(target=startConnection, args=(port3, port4,))
+t4 = threading.Thread(target=startConnection, args=(port4, port3,))
 
 t1.start()
 t2.start()
+t3.start()
+t4.start()
 t1.join()
 t2.join()
+t3.join()
+t4.join()
 log('  done')
 os.remove('sessions/'+sessionFile)
 

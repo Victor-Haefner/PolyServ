@@ -45,21 +45,23 @@ if (file_exists("$SESDIR/$uid2-$uid")) { // case 2
         file_put_contents("$LOGDIR/log.getConnection.txt", "\n found existing session: $uid-$uid2, send ports: $uri2/$uri1", FILE_APPEND);
 } else { // case 1
 	// get free ports
-	$port1 = findPort(4020, 4035);
-	$port2 = findPort(4036, 4050);
+	$port1 = findPort(4000, 4100);
+	$port2 = findPort(4101, 4200);
+	$port3 = findPort(4201, 4300);
+	$port4 = findPort(4301, 4400);
 
 	// create session
 	$sessionFile = "$uid-$uid2";
 	$now = time();
-	$data = "$uid\n$uid2\n$port1\n$port2\n$now";
+	$data = "$uid\n$uid2\n$port1\n$port2\n$now\n$port3\n$port4";
 	file_put_contents("$SESDIR/$sessionFile", $data);
 
 	// start TCP listeners
 	$arg1 = escapeshellarg($sessionFile);
 	exec("python startConnection.py $arg1 > /dev/null &"); 
 	sleep(1); // wait for python to get started
-	print "$port1:case1:$port2";
-        file_put_contents("$LOGDIR/log.getConnection.txt", "\n created new session: $uid-$uid2, write ports: $port1/$port2", FILE_APPEND);
+	print "$port1:case1:$port2:$port3:$port4";
+        file_put_contents("$LOGDIR/log.getConnection.txt", "\n created new session: $uid-$uid2, write ports: $port1/$port2 and $port3/$port4", FILE_APPEND);
 }
 
 ?>
