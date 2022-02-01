@@ -117,17 +117,17 @@ def startConnection(port, port2):
 
 t1 = threading.Thread(target=startConnection, args=(port1, port2,))
 t2 = threading.Thread(target=startConnection, args=(port2, port1,))
-t3 = threading.Thread(target=startConnection, args=(port3, port4,))
-t4 = threading.Thread(target=startConnection, args=(port4, port3,))
+#t3 = threading.Thread(target=startConnection, args=(port3, port4,))
+#t4 = threading.Thread(target=startConnection, args=(port4, port3,))
 
 t1.start()
 t2.start()
-t3.start()
-t4.start()
+#t3.start()
+#t4.start()
 t1.join()
 t2.join()
-t3.join()
-t4.join()
+#t3.join()
+#t4.join()
 log('  done')
 os.remove('sessions/'+sessionFile)
 
