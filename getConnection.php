@@ -49,15 +49,15 @@ if (file_exists("$SESDIR/$uid2-$uid")) { // case 2
         file_put_contents("$LOGDIR/log.getConnection.txt", "\n found existing session: $uid-$uid2, send ports: $port1/$port2 and $port3/$port4", FILE_APPEND);
 } else { // case 1
 	// get free ports
-	$port1 = findPort(4000, 4100);
-	$port2 = findPort(4101, 4200);
-	$port3 = findPort(4201, 4300);
-	$port4 = findPort(4301, 4400);
+	$port1 = findPort(4000, 4099);
+	$port2 = findPort(4100, 4199);
+	$port3 = findPort(4200, 4299);
+	$port4 = findPort(4300, 4400);
 
 	// create session
 	$sessionFile = "$uid-$uid2";
 	$now = time();
-	$data = "$uid\n$uid2\n$port1\n$port2\n$now\n$port3\n$port4";
+	$data = "$uid\n$uid2\n$port1\n$port2\n$now\n$port3\n$port4\n";
 	file_put_contents("$SESDIR/$sessionFile", $data);
 
 	// start TCP listeners
