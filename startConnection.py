@@ -99,9 +99,9 @@ def startConnection(port, port2):
 				connection.settimeout(recvTimeout)
 				data = connection.recv(256)
 				if data: 
-					log(' got "'+data+'" on port: '+str(port))
+					log(' got "'+str(len(data))+'" on port: '+str(port))
 					if port2 in connectionMap: 
-						log('  send "'+data+'" to port: '+str(port2))
+						log('  send "'+str(len(data))+'" to port: '+str(port2))
 						connectionMap[port2].sendall(data)
 				else: break
             
