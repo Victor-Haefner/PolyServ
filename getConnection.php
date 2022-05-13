@@ -45,7 +45,7 @@ if (file_exists("$SESDIR/$uid2-$uid")) { // case 2
         $port4 = rtrim($data[6]);
         $port3 = rtrim($data[5]);
         sleep(1); // give python some time to start, see below
-	print "$port1:case2:$port2:$port3:$port4";
+	print "$port1:case3:$port2:$port3:$port4";
         file_put_contents("$LOGDIR/log.getConnection.txt", "\n found existing session: $uid-$uid2, send ports: $port1/$port2 and $port3/$port4", FILE_APPEND);
 } else { // case 1
 	// get free ports

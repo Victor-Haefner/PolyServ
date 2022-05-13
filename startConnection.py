@@ -42,8 +42,9 @@ port4 = int(port4)
 
 connectionMap = {}
 
-acceptTimeout = 5*60 # 5 min
-recvTimeout = 5*60 # 5 min
+acceptTimeout = int(5*60) # 5 min
+recvTimeout = int(5*60) # 5 min
+udpTimeout = int(5*60) # 5 min
 
 def getSessionRefCount(userFile):
         f = open(userFile)
@@ -81,7 +82,6 @@ def startUDPConnection(port, port2):
 	log(' start UDP socket on: '+serverIP+':'+str(port)+', timeout after '+str(acceptTimeout)+' s')
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     	sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-	sock.settimeout(acceptTimeout)
 	try:
 		sock.bind((serverIP, port))
 	except:
@@ -89,7 +89,7 @@ def startUDPConnection(port, port2):
 
 	try:
 		while True: # Receive the data in small chunks and retransmit it
-			sock.settimeout(recvTimeout)
+			sock.settimeout(udpTimeout)
 			data, address = sock.recvfrom(256)
 
 			if not port in connectionMap:
