@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+ 	<style type="text/css">
+ 		body {
+ 			margin:0;
+		}
+
+		#toolbar {
+			display: flex;
+			justify-content: space-around;
+			align-items: center;
+			background: #fff;
+			width: 100vw;
+			height: 10vh;
+		}
+
+ 		#toolbar button {
+ 			height: 7vh;
+			width: 100%;
+ 		}
+
+		#labels {
+			display: flex;
+                        justify-content: space-around;
+                        align-items: center;
+			height: 5vh;
+			width: 100vw;
+		}
+
+		#pannels {
+			display: flex;
+			background: #bbb;
+			width: 100vw;
+			height: 85vh;
+		}
+
+		.pannel {
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+			width: 100%;
+		}
+
+		.active {
+			background: #aff;
+		}
+
+		.referenced {
+			border: 2px black solid;
+		}
+ 	</style>
+ 	<script>
+		var users = {};
+		var bridges = {};
+
+
+		function req(uri) {
+			//console.log(window.location);
+			uri = window.location.href + "../" + uri;
+			//console.log(uri);
+			var xmlHttp = new XMLHttpRequest();
+                        xmlHttp.open( "GET", uri, false ); // false for synchronous request
+                        xmlHttp.send( null );
+                        return xmlHttp.responseText;
+		}
+
+ 		function newRoom() { ; };
+ 		
+		function newUser() {
+			req("regUser.php?NAME=bob"); 
+			updateUsers();
+		};
+
+		function connect() { 
+			var uid1 = selectedUser1.uid;
+			var uid2 = selectedUser2.uid;
+			var res1 = req("getConnection.php?UID="+uid1+"&UID2="+uid2);
+			var res2 = req("getConnection.php?UID="+uid2+"&UID2="+uid1);
+			console.log(res1);
+			console.log(res2); 
+		};
+
+		function delRoom() { ; };
+
+		function delUser() { ; };
+
+		function disconnect() { ; };
+
+		function testTCP() { ; };
+
+		function testUDP() { ; };
+
+		var selectedUser1 = undefined;
+		var selectedUser2 = undefined;
+		function onUserSelect() {			
+			if (selectedUser2) {
+				selectedUser2.className = '';
+			}
+
+			selectedUser2 = selectedUser1;
+			selectedUser1 = this;
+			this.className = 'active';
+			//console.log(this.innerHTML);
+		}
+
+		var usersChanged = false;
+		var oldUserData = '';
+		var usersList = [];
+		function updateUsers() {
+			var data = req("listUsers.php");
+			if (data == oldUserData) return;
+			oldUserData = data;
+
+			usersChanged = true;
+			var usersData = data.split('\n');
+			usersList = [];
+                        for (var i=0; i<usersData.length; i++) {
+                                var userData = usersData[i].split('|');
+                                if (userData == '') continue;
+                                usersList.push(userData);
+                        }
+                        //console.log(users);
+		}
+
+
+		function updateUsersPanel() {
+			var usersPanel = document.getElementById('users');
+			usersPanel.innerHTML = "";
+			
+			for (var i=0; i<usersList.length; i++) {
+				var user = usersList[i];
+				var divUser = document.createElement('button');
+				divUser.onclick = onUserSelect;
+				divUser.name = user[0];
+				divUser.uid = user[1];
+				usersPanel.appendChild(divUser);
+				divUser.innerHTML = user[0] + ' ('+user[1]+')';
+
+				users[user[1]] = divUser;
+			}
+
+			usersChanged = false;
+		}
+
+		var selectedBridge = undefined;
+		var referencedUsers = [];
+                function onBridgeSelect() {
+                        if (selectedBridge) {
+                                selectedBridge.className = '';
+                        }
+
+                        selectedBridge = this;
+                        this.className = 'active';
+			
+			var bridgeData = req(this.path).split('\n');
+			var usr1 = users[bridgeData[0]];
+			var usr2 = users[bridgeData[1]];
+			usr1.className = usr1.className + ' referenced';
+			usr2.className = usr2.className + ' referenced';
+			for (var i=0; i<referencedUsers.length; i++) referencedUsers[i].className = '';
+			referencedUsers = [];
+			referencedUsers.push(usr1);
+			referencedUsers.push(usr2);
+                        console.log(bridgeData);
+                }
+
+                var bridgesChanged = false;
+                var oldBridgeData = '';
+		var bridgesList = [];
+                function updateBridges() {
+                        var data = req("listConnections.php");
+                        if (data == oldBridgeData) return;
+                        oldBridgeData = data;
+			
+
+                        bridgesChanged = true;
+                        var bridgesData = data.split('\n');
+                        bridgesList = [];
+                        for (var i=0; i<bridgesData.length; i++) {
+                                var bridgeData = bridgesData[i];
+                                if (bridgeData == '') continue;
+                                bridgesList.push(bridgeData);
+                        }
+                        //console.log(data);
+                }
+
+
+                function updateBridgesPanel() {
+                        var bridgesPanel = document.getElementById('bridges');
+                        bridgesPanel.innerHTML = "";
+
+                        for (var i=0; i<bridgesList.length; i++) {
+                                var bridge = bridgesList[i];
+                                var divBridge = document.createElement('button');
+                                divBridge.onclick = onBridgeSelect;
+                                divBridge.path = bridge;
+                                bridgesPanel.appendChild(divBridge);
+                                divBridge.innerHTML = bridge;
+
+				bridges[divBridge.path] = divBridge;
+                        }
+
+                        bridgesChanged = false;
+                }
+
+
+
+		function update() {
+			//console.log('bla');
+			updateUsers();
+			updateBridges();
+			if (usersChanged) updateUsersPanel();
+			if (bridgesChanged) updateBridgesPanel();	
+			setTimeout( update, 500);
+		}
+ 	</script>
+</head>
+
+<body>
+	<div id='toolbar'>
+		<button onclick='newRoom()' disabled>New<br/>Room</button>
+		<button onclick='newUser()'>New<br/>User</button>
+		<button onclick='connect()'>Connect</button>
+
+		<button onclick='delRoom()'>Del<br/>Room</button>
+                <button onclick='delUser()'>Del<br/>User</button>
+                <button onclick='disconnect()'>Disconnect</button>
+
+		<button onclick='testTCP()'>Send<br/>TCP<br/>packet</button>
+                <button onclick='testUDP()'>Send<br/>UDP<br/>packet</button>
+	</div>
+
+	<div id='labels'>
+		<label>Rooms</label>
+                <label>Users</label>
+		<label>Bridges</label>
+		<label>Connections</label>
+		<label>Sockets</label>
+	</div>
+
+	<div id='pannels'>
+		<div class='pannel' id='rooms'></div>
+		<div class='pannel' id='users'></div>
+		<div class='pannel' id='bridges'></div>
+		<div class='pannel' id='connections'></div>
+		<div class='pannel' id='sockets'></div>
+	</div>
+
+	<script>
+		var pannels = document.getElementById('pannels');
+		for (var i=0; i < pannels.children.length; i++) {
+			var pannel = pannels.children[i];
+			if (i%2 == 1) pannel.style.background = '#ccc';	
+		}
+
+		update();
+	</script>
+</body>
+</html>
