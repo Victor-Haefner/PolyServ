@@ -48,7 +48,7 @@
 		}
 
 		.referenced {
-			border: 2px black solid;
+			border: 2px green solid;
 		}
  	</style>
  	<script>
@@ -94,6 +94,7 @@
 
 		var selectedUser1 = undefined;
 		var selectedUser2 = undefined;
+		var referencedBridges = [];
 		function onUserSelect() {			
 			if (selectedUser2) {
 				selectedUser2.className = '';
@@ -103,6 +104,18 @@
 			selectedUser1 = this;
 			this.className = 'active';
 			//console.log(this.innerHTML);
+
+                        for (var i=0; i<referencedBridges.length; i++) referencedBridges[i].className = '';
+			
+			referencedBridges = [];
+			for (var i=0; i<bridgesList.length; i++) {
+				var bName = bridgesList[i];
+				if (bName.includes(this.uid)) {
+					var bridge = bridges[ bName ];
+                        		bridge.className = bridge.className + ' referenced';
+                        		referencedBridges.push(bridge);
+				}
+			}
 		}
 
 		var usersChanged = false;
@@ -157,13 +170,15 @@
 			var bridgeData = req(this.path).split('\n');
 			var usr1 = users[bridgeData[0]];
 			var usr2 = users[bridgeData[1]];
-			usr1.className = usr1.className + ' referenced';
-			usr2.className = usr2.className + ' referenced';
 			for (var i=0; i<referencedUsers.length; i++) referencedUsers[i].className = '';
+			usr1.className = usr1.className + ' referenced';
+			usr2.className = usr2.className + ' referenced';			
 			referencedUsers = [];
 			referencedUsers.push(usr1);
 			referencedUsers.push(usr2);
                         console.log(bridgeData);
+			
+			
                 }
 
                 var bridgesChanged = false;
@@ -237,7 +252,7 @@
                 <label>Users</label>
 		<label>Bridges</label>
 		<label>Connections</label>
-		<label>Sockets</label>
+		<label>Info</label>
 	</div>
 
 	<div id='pannels'>
@@ -245,7 +260,7 @@
 		<div class='pannel' id='users'></div>
 		<div class='pannel' id='bridges'></div>
 		<div class='pannel' id='connections'></div>
-		<div class='pannel' id='sockets'></div>
+		<div class='pannel' id='info'></div>
 	</div>
 
 	<script>
