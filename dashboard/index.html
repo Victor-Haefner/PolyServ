@@ -167,6 +167,7 @@
                         selectedBridge = this;
                         this.className = 'active';
 			
+			// highlight users
 			var bridgeData = req(this.path).split('\n');
 			var usr1 = users[bridgeData[0]];
 			var usr2 = users[bridgeData[1]];
@@ -176,9 +177,9 @@
 			referencedUsers = [];
 			referencedUsers.push(usr1);
 			referencedUsers.push(usr2);
-                        console.log(bridgeData);
+                        //console.log(bridgeData);
 			
-			
+			updateConnectionsPanel();
                 }
 
                 var bridgesChanged = false;
@@ -220,7 +221,19 @@
                         bridgesChanged = false;
                 }
 
+		function updateConnectionsPanel() {
+			var bridge = selectedBridge;
+			var connsPanel = document.getElementById('connections');
 
+			connsPanel.innerHTML = "";
+			
+			// TODO: 
+			//  get infos from python connection
+			//  add control channel to py script
+			//  getSockets -> return sockets identifiers and type UDP/TCP
+			//  getSocketInfo -> returns everything related to socket state
+			//  getSocketFlow -> returns data throughput b/s
+		}
 
 		function update() {
 			//console.log('bla');
