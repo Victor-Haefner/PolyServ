@@ -53,14 +53,15 @@ if (file_exists("$SESDIR/$uid2-$uid")) { // case 2
 	$port2 = findPort(4100, 4199);
 	$port3 = findPort(4200, 4299);
 	$port4 = findPort(4300, 4400);
+	$portS = findPort(4401, 4500); // local port
 
 	// create session
 	$sessionFile = "$uid-$uid2";
 	$now = time();
-	$data = "$uid\n$uid2\n$port1\n$port2\n$now\n$port3\n$port4\n";
+	$data = "$uid\n$uid2\n$port1\n$port2\n$now\n$port3\n$port4\n$portS\n";
 	file_put_contents("$SESDIR/$sessionFile", $data);
 
-	// start TCP listeners
+	// start python deamon
 	$arg1 = escapeshellarg($sessionFile);
 	exec("python startConnection.py $arg1 > /dev/null &"); 
 	sleep(1); // wait for python to get started

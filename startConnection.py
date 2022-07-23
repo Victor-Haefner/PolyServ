@@ -31,14 +31,17 @@ port2 = data[3][:-1]
 tnow  = data[4][:-1]
 port3 = data[5][:-1]
 port4 = data[6][:-1]
+portS = data[7][:-1]
 
 log(' client 1 on: '+port1+' '+port3)
 log(' client 2 on: '+port2+' '+port4)
+log(' service port: '+portS)
 
 port1 = int(port1)
 port2 = int(port2)
 port3 = int(port3)
 port4 = int(port4)
+portS = int(portS)
 
 connectionMap = {}
 
