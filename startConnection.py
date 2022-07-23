@@ -3,6 +3,8 @@
 import socket, sys, os
 import threading
 from time import sleep
+from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
+from urlparse import urlparse, parse_qs
 
 def log(msg, doAppend = True):
 	print msg
@@ -152,19 +154,50 @@ def startTCPConnection(port, port2):
 	finally:
 		sock.close()
 
+class ServiceServer(BaseHTTPRequestHandler):
+	def answer(self, msg):
+		self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(msg)
+
+	def handleCmd(self, cmd):
+		if cmd == 'getState':
+			self.answer('I am fine, thanks for asking :D')
+
+		if cmd == 'shutdown':
+			self.answer('Shutdown service server..')
+                	raise Exception('Received shutdown request')
+
+	def do_GET(self):
+		args = parse_qs(urlparse(self.path).query)
+		msg = args['MSG'][0]
+		self.handleCmd(msg)
+
+def startServiceAccess(port):
+	webServer = HTTPServer(("localhost", port), ServiceServer)
+	try:
+		webServer.serve_forever()
+	except:
+		pass
+	webServer.server_close()
+
 t1 = threading.Thread(target=startTCPConnection, args=(port1, port2,))
 t2 = threading.Thread(target=startTCPConnection, args=(port2, port1,))
 t3 = threading.Thread(target=startUDPConnection, args=(port3, port4,))
 t4 = threading.Thread(target=startUDPConnection, args=(port4, port3,))
+t5 = threading.Thread(target=startServiceAccess, args=(portS,))
 
 t1.start()
 t2.start()
 t3.start()
 t4.start()
+t5.start()
 t1.join()
 t2.join()
 t3.join()
 t4.join()
+t5.join()
 log('  done')
 os.remove('sessions/'+sessionFile)
 

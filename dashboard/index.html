@@ -66,6 +66,10 @@
                         return xmlHttp.responseText;
 		}
 
+		function reqSession(port, msg) {
+			return req("sendSession.php?PORT="+port+"&MSG="+msg);
+		}
+
  		function newRoom() { ; };
  		
 		function newUser() {
@@ -177,9 +181,9 @@
 			referencedUsers = [];
 			referencedUsers.push(usr1);
 			referencedUsers.push(usr2);
-                        //console.log(bridgeData);
+                        console.log(bridgeData);
 			
-			updateConnectionsPanel();
+			updateConnectionsPanel(bridgeData);
                 }
 
                 var bridgesChanged = false;
@@ -221,11 +225,13 @@
                         bridgesChanged = false;
                 }
 
-		function updateConnectionsPanel() {
+		function updateConnectionsPanel(data) {
 			var bridge = selectedBridge;
 			var connsPanel = document.getElementById('connections');
 
-			connsPanel.innerHTML = "";
+			var res = reqSession(data[7], "getState");
+
+			connsPanel.innerHTML = res;
 			
 			// TODO: 
 			//  get infos from python connection
