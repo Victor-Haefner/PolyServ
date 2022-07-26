@@ -88,9 +88,16 @@
 
 		function delRoom() { ; };
 
-		function delUser() { ; };
+		function delUser() { 
+			var uid1 = selectedUser1.uid;
+			req("remUser.php?UID="+uid1); 
+		};
 
-		function disconnect() { ; };
+		function delBridge() { 
+			var path = selectedBridge.path;
+			console.log(path);
+			req("remSession.php?PATH="+path); 
+		};
 
 		function testTCP() { ; };
 
@@ -171,6 +178,8 @@
                         selectedBridge = this;
                         this.className = 'active';
 			
+			updateConnectionsPanel(bridgeData);
+
 			// highlight users
 			var bridgeData = req(this.path).split('\n');
 			var usr1 = users[bridgeData[0]];
@@ -182,8 +191,6 @@
 			referencedUsers.push(usr1);
 			referencedUsers.push(usr2);
                         console.log(bridgeData);
-			
-			updateConnectionsPanel(bridgeData);
                 }
 
                 var bridgesChanged = false;
@@ -258,9 +265,9 @@
 		<button onclick='newUser()'>New<br/>User</button>
 		<button onclick='connect()'>Connect</button>
 
-		<button onclick='delRoom()'>Del<br/>Room</button>
+		<button onclick='delRoom()' disabled>Del<br/>Room</button>
                 <button onclick='delUser()'>Del<br/>User</button>
-                <button onclick='disconnect()'>Disconnect</button>
+                <button onclick='delBridge()'>Del<br/>Bridge</button>
 
 		<button onclick='testTCP()'>Send<br/>TCP<br/>packet</button>
                 <button onclick='testUDP()'>Send<br/>UDP<br/>packet</button>
