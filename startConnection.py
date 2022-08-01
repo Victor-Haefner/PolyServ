@@ -169,6 +169,25 @@ class ServiceServer(BaseHTTPRequestHandler):
 			self.answer('Shutdown service server..')
                 	raise Exception('Received shutdown request')
 
+		if cmd == 'getSockets':
+			self.answer('TCP|UDP')
+
+		if '|' in cmd:
+			data = cmd.split('|')
+			if data[0] == 'getSocketInfo':
+				if data[1] == 'TCP': self.answer('route|'+str(port1)+'|'+str(port2))
+				if data[1] == 'UDP': self.answer('route|'+str(port3)+'|'+str(port4))
+
+
+		#if cmd.startswith('getSocketInfo'):
+                #	self.answer('bubu')
+		#        socket = cmd.split('|')[1]
+		#	if socket == 'TCP': self.answer('route|'+str(port1)+'|'+str(port2))
+		#	if socket == 'UDP': self.answer('route|'+str(port3)+'|'+str(port4))
+
+		#if cmd.startswith'getSocketFlow'):
+                #        pass
+
 	def do_GET(self):
 		args = parse_qs(urlparse(self.path).query)
 		msg = args['MSG'][0]

@@ -178,10 +178,12 @@
                         selectedBridge = this;
                         this.className = 'active';
 			
+			
+			// get session data
+			var bridgeData = req(this.path).split('\n');
 			updateConnectionsPanel(bridgeData);
 
 			// highlight users
-			var bridgeData = req(this.path).split('\n');
 			var usr1 = users[bridgeData[0]];
 			var usr2 = users[bridgeData[1]];
 			for (var i=0; i<referencedUsers.length; i++) referencedUsers[i].className = '';
@@ -233,13 +235,26 @@
                 }
 
 		function updateConnectionsPanel(data) {
-			var bridge = selectedBridge;
+			var bridge = data[7];
 			var connsPanel = document.getElementById('connections');
+			connsPanel.innerHTML = "";
 
-			var res = reqSession(data[7], "getState");
+			var res = reqSession(bridge, "getState");
+			var bs = document.createElement('div');
+			bs.innerHTML = res;
+			connsPanel.appendChild(bs);
 
-			connsPanel.innerHTML = res;
-			
+			var res = reqSession(bridge, "getSockets");
+			var socks = res.split('|');
+			console.log(res);
+			for (var i=0;i<socks.length; i++) {
+				var sb = document.createElement('button');
+				var socData = reqSession(bridge, "getSocketInfo|"+socks[i]);
+				//var socData = reqSession(bridge, "getSockets");
+				sb.innerHTML = socks[i] + " : " + socData;
+				connsPanel.appendChild(sb);
+			}
+
 			// TODO: 
 			//  get infos from python connection
 			//  add control channel to py script
