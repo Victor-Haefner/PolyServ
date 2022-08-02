@@ -85,6 +85,7 @@ incrementSessionRefs('users/'+user2)
 
 class UDPSocket:
 	def __init__(self, IP, port):
+		self.type = 'UDP'
 		self.IP = IP
 		self.port = port
 		self.address = None
@@ -112,7 +113,7 @@ class UDPSocket:
 
 		try:
 			while True: # Receive the data in small chunks and retransmit it
-				self.state = 'listening'
+				self.state = 'receiving'
 				self.sock.settimeout(udpTimeout)
 				data, address = self.sock.recvfrom(256)
 
@@ -143,6 +144,7 @@ def startUDPConnection(port, port2):
 
 class TCPSocket:
         def __init__(self, IP, port):
+                self.type = 'TCP'
                 self.IP = IP
                 self.port = port
                 self.address = None
@@ -163,7 +165,7 @@ class TCPSocket:
                         log('  bind socket on '+IP+':'+str(port)+' failed! '+str(e))
                         self.state = 'bind failed with '+str(e)
 
-        def close(self): # TODO
+        def close(self):
                 log('close TCP socket')
                 self.sock.shutdown(socket.SHUT_RDWR)
                 self.sock.close()
@@ -171,6 +173,7 @@ class TCPSocket:
         def listen(self, callback):
                 if not self.bound: return
 
+                self.state = 'listening'
                 self.sock.listen(1)
                 log('  start listening')
 
@@ -181,7 +184,7 @@ class TCPSocket:
 
                         try:
                                 while True: # Receive the data in small chunks and retransmit it
-                                        self.state = 'listening'
+                                        self.state = 'receiving'
                                         connection.settimeout(recvTimeout)
                                         data = connection.recv(256)
                                         if data: 
