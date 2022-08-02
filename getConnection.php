@@ -9,7 +9,7 @@ $uid2 = $_GET['UID2'];
 //  case 1: this is the first user connecting
 //  case 2: this is the second user connecting
 
-function findPort($x1, $x2) {
+function findTCPPort($x1, $x2) {
 	ini_set('display_errors', '0');
 	ini_set('display_startup_errors', '0');
 	error_reporting(E_NONE);
@@ -22,6 +22,31 @@ function findPort($x1, $x2) {
 		}
 	}
 	return 0;
+}
+
+function findUDPPort($x1, $x2) {
+	$ports = array();
+
+	$d = $GLOBALS['SESDIR'];
+	if ($handle = opendir($d)) {
+		while (false !== ($file = readdir($handle))) {
+			if ('.' === $file) continue;
+			if ('..' === $file) continue;
+
+			$data = file("$d/$file");
+			$p1 = $data[5];
+			$p2 = $data[6];
+			array_push($ports, $p1, $p2);
+		}
+		closedir($handle);
+	}
+
+	for ($x = $x1; $x <= $x2; $x++) {
+		if (!in_array($x, $ports)) {
+                       	return $x;
+		}
+        }
+        return 0;
 }
 
 file_put_contents("$LOGDIR/log.getConnection.txt", "check for session $uid2-$uid");
@@ -49,11 +74,11 @@ if (file_exists("$SESDIR/$uid2-$uid")) { // case 2
         file_put_contents("$LOGDIR/log.getConnection.txt", "\n found existing session: $uid-$uid2, send ports: $port1/$port2 and $port3/$port4", FILE_APPEND);
 } else { // case 1
 	// get free ports
-	$port1 = findPort(4000, 4099);
-	$port2 = findPort(4100, 4199);
-	$port3 = findPort(4200, 4299);
-	$port4 = findPort(4300, 4400);
-	$portS = findPort(4401, 4500); // local port
+	$port1 = findTCPPort(4000, 4099);
+	$port2 = findTCPPort(4100, 4199);
+	$port3 = findUDPPort(4200, 4299);
+	$port4 = findUDPPort(4300, 4400);
+	$portS = findTCPPort(4401, 4500); // local service port
 
 	// create session
 	$sessionFile = "$uid-$uid2";
