@@ -190,7 +190,9 @@ class ServiceServer(BaseHTTPRequestHandler):
 			self.answer(state)
 
 		if cmd == 'shutdown':
+			global doService
 			doService = False
+			log('service shutdown..')
 			self.answer('Shutdown service server..')
 
 		if cmd == 'getSockets':
@@ -213,8 +215,8 @@ def startServiceAccess(port):
 		while doService: webServer.handle_request()
 	except:
 		pass
+	log(' close server')
 	webServer.server_close()
-	sys.exit()
 
 t1 = threading.Thread(target=startTCPConnection, args=(port1, port2,))
 t2 = threading.Thread(target=startTCPConnection, args=(port2, port1,))
@@ -224,14 +226,14 @@ t5 = threading.Thread(target=startServiceAccess, args=(portS,))
 
 t1.start()
 t2.start()
-t3.start()
-t4.start()
+#t3.start()
+#t4.start()
 t5.start()
 
 t1.join()
 t2.join()
-t3.join()
-t4.join()
+#t3.join()
+#t4.join()
 t5.join()
 log('  done')
 os.remove('sessions/'+sessionFile)
