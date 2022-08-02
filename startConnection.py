@@ -101,7 +101,7 @@ class UDPSocket:
 			self.bound = True
 		except Exception as e:
 			log('  bind socket on '+IP+':'+str(port)+' failed! '+str(e))
-			self.state = 'bind failed'
+			self.state = 'bind failed with '+str(e)
 
 	def close(self):
 		log('close UDP socket')
@@ -141,44 +141,78 @@ def startUDPConnection(port, port2):
 	connectionMap[port] = UDPSocket(serverIP, port)
 	connectionMap[port].listen(onData)
 
+class TCPSocket:
+        def __init__(self, IP, port):
+                self.IP = IP
+                self.port = port
+                self.address = None
+		self.connection = None
+                self.state = 'instanciated'
+                self.bound = False
+
+                log(' start TCP socket on: '+IP+':'+str(port)+', timeout after '+str(acceptTimeout)+' s')
+                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+                self.sock.settimeout(acceptTimeout)
+
+                try:
+                        self.state = 'binding'
+                        self.sock.bind((IP, port))
+                        self.bound = True
+                except Exception as e:
+                        log('  bind socket on '+IP+':'+str(port)+' failed! '+str(e))
+                        self.state = 'bind failed with '+str(e)
+
+        def close(self): # TODO
+                log('close TCP socket')
+                self.sock.shutdown(socket.SHUT_RDWR)
+                self.sock.close()
+
+        def listen(self, callback):
+                if not self.bound: return
+
+                self.sock.listen(1)
+                log('  start listening')
+
+                try:
+                        self.connection, self.address = self.sock.accept()
+                        connectionMap[port] = connection
+                        sleep(0.2)
+
+                        try:
+                                while True: # Receive the data in small chunks and retransmit it
+                                        self.state = 'listening'
+                                        connection.settimeout(recvTimeout)
+                                        data = connection.recv(256)
+                                        if data: 
+                                                #log(' got "'+str(len(data))+'" on port: '+str(port))
+                                                if callback: callback(data)
+                                        else: break
+                                self.state = 'finished'
+                        except Exception as e:
+                                log(' connection recv timeout on '+str(port)+' with: '+str(e))
+				self.state = 'exception: '+str(e)
+                        finally:
+                                connection.close()
+                                log(' connection closed on '+str(port))
+                except Exception as e:
+			self.state = 'exception: '+str(e)
+                        log('socket accept timed out! '+str(e))
+                finally:
+                        self.state = 'closed'
+                        sock.close()
+                        log(' connection closed on '+str(self.port))
+
 
 def startTCPConnection(port, port2):
-	log(' start TCP socket on: '+serverIP+':'+str(port))
-	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    	sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-	sock.settimeout(acceptTimeout)
-	try:
-		sock.bind((serverIP, port))
-	except:
-		log('  bind socket on '+str(port)+' failed!')
-	sock.listen(1)
-	log('  start listening')
+        def onData(data):
+                if port2 in connectionMap:
+                        tcpSock = connectionMap[port2]
+                        if tcpSock.connection: tcpSock.connection.sendall(data)
 
-	try:
-		connection, client_address = sock.accept()
-		connectionMap[port] = connection
-		sleep(0.2)
+        connectionMap[port] = TCPSocket(serverIP, port)
+        connectionMap[port].listen(onData)
 
-		try:
-			while True: # Receive the data in small chunks and retransmit it
-				connection.settimeout(recvTimeout)
-				data = connection.recv(256)
-				if data: 
-					log(' got "'+str(len(data))+'" on port: '+str(port))
-					if port2 in connectionMap: 
-						log('  send "'+str(len(data))+'" to port: '+str(port2))
-						connectionMap[port2].sendall(data)
-				else: break
-            
-            	except:
-			log(' connection recv timeout on '+str(port))
-		finally:
-			connection.close()
-			log(' connection closed on '+str(port))
-    	except:
-		log('socket accept timed out!')
-	finally:
-		sock.close()
 
 doService = True
 
@@ -234,21 +268,21 @@ t3 = threading.Thread(target=startUDPConnection, args=(port3, port4,))
 t4 = threading.Thread(target=startUDPConnection, args=(port4, port3,))
 t5 = threading.Thread(target=startServiceAccess, args=(portS,))
 
-#t1.start()
-#t2.start()
+t1.start()
+t2.start()
 t3.start()
 t4.start()
 t5.start()
 
-#t1.join()
-#t2.join()
+t1.join()
+t2.join()
 t3.join()
 t4.join()
 t5.join()
 log('  done')
 os.remove('sessions/'+sessionFile)
 
-if getSessionRefCount('users/'+user1) <= 1: os.remove('users/'+user1)
-else: decrementSessionRefs('users/'+user1)
-if getSessionRefCount('users/'+user2) <= 1: os.remove('users/'+user2)
-else: decrementSessionRefs('users/'+user2)
+#if getSessionRefCount('users/'+user1) <= 1: os.remove('users/'+user1)
+#else: decrementSessionRefs('users/'+user1)
+#if getSessionRefCount('users/'+user2) <= 1: os.remove('users/'+user2)
+#else: decrementSessionRefs('users/'+user2)
