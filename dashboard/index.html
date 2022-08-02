@@ -96,7 +96,9 @@
 		function delBridge() { 
 			var path = selectedBridge.path;
 			console.log(path);
-			req("remSession.php?PATH="+path); 
+			var res = req("remSession.php?PATH="+path);
+			console.log("delBridge:");
+			console.log(res); 
 		};
 
 		function testTCP() { ; };

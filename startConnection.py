@@ -83,38 +83,56 @@ def decrementSessionRefs(userFile):
 incrementSessionRefs('users/'+user1)
 incrementSessionRefs('users/'+user2)
 
+class UDPSocket:
+	def __init__(self, IP, port):
+		self.IP = IP
+		self.port = port
+		self.address = None
+		self.state = 'instanciated'
+
+		log(' start UDP socket on: '+serverIP+':'+str(port)+', timeout after '+str(acceptTimeout)+' s')
+		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+
+		try:
+			self.state = 'binding'
+			sock.bind((IP, port))
+		except:
+			log('  bind socket on '+str(port)+' failed!')
+			self.state = 'bind failed'
+
+	def listen(self, callback):
+		try:
+			while True: # Receive the data in small chunks and retransmit it
+				self.state = 'listening'
+				self.sock.settimeout(udpTimeout)
+				data, address = self.sock.recvfrom(256)
+
+				if not self.address: self.address = address
+
+				if data:
+					if callback: callback(data)
+				else: break
+			self.state = 'finished'
+
+		except Exception as e:
+			self.state = 'exception: '+str(e)
+			log(' connection exception on '+str(self.port)+': '+str(e))
+		finally:
+			self.state = 'closed'
+			sock.close()
+			log(' connection closed on '+str(self.port))
+
+
 def startUDPConnection(port, port2):
-	log(' start UDP socket on: '+serverIP+':'+str(port)+', timeout after '+str(acceptTimeout)+' s')
-	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    	sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-	try:
-		sock.bind((serverIP, port))
-	except:
-		log('  bind socket on '+str(port)+' failed!')
+	def onData(data):
+		if port2 in connectionMap: 
+			udpSock = connectionMap[port2]
+			if udpSock.address: udpSock.sock.sendto(data, udpSock.address)
 
-	try:
-		while True: # Receive the data in small chunks and retransmit it
-			sock.settimeout(udpTimeout)
-			data, address = sock.recvfrom(256)
+	connectionMap[port] = UDPSocket(serverIP, port)
+	connectionMap[port].listen(onData)
 
-			if not port in connectionMap:
-				log(' set connectionMap for port '+str(port))
-				connectionMap[port] = (sock, address)
-
-			if data: 
-				#log(' got "'+str(len(data))+'" on port: '+str(port))
-				if port2 in connectionMap: 
-					#log('  send "'+str(len(data))+'" to port: '+str(port2))
-					sock2, address2 = connectionMap[port2]
-					sock2.sendto(data, address2)
-			else: break
-			
-            
-    	except Exception as e:
-		log(' connection exception on '+str(port)+': '+str(e))
-	finally:
-		sock.close()
-		log(' connection closed on '+str(port))
 
 def startTCPConnection(port, port2):
 	log(' start TCP socket on: '+serverIP+':'+str(port))
@@ -154,6 +172,8 @@ def startTCPConnection(port, port2):
 	finally:
 		sock.close()
 
+doService = True
+
 class ServiceServer(BaseHTTPRequestHandler):
 	def answer(self, msg):
 		self.send_response(200)
@@ -163,11 +183,15 @@ class ServiceServer(BaseHTTPRequestHandler):
 
 	def handleCmd(self, cmd):
 		if cmd == 'getState':
-			self.answer('I am fine, thanks for asking :D')
+			state = ''
+			state += 'N connections: ' + str(len(connectionMap))
+			for port, sock in connectionMap.items():
+				state += '<br> ('+str(port)+') '+str(sock.address)+' '+sock.state
+			self.answer(state)
 
 		if cmd == 'shutdown':
+			doService = False
 			self.answer('Shutdown service server..')
-                	raise Exception('Received shutdown request')
 
 		if cmd == 'getSockets':
 			self.answer('TCP|UDP')
@@ -178,16 +202,6 @@ class ServiceServer(BaseHTTPRequestHandler):
 				if data[1] == 'TCP': self.answer('route|'+str(port1)+'|'+str(port2))
 				if data[1] == 'UDP': self.answer('route|'+str(port3)+'|'+str(port4))
 
-
-		#if cmd.startswith('getSocketInfo'):
-                #	self.answer('bubu')
-		#        socket = cmd.split('|')[1]
-		#	if socket == 'TCP': self.answer('route|'+str(port1)+'|'+str(port2))
-		#	if socket == 'UDP': self.answer('route|'+str(port3)+'|'+str(port4))
-
-		#if cmd.startswith'getSocketFlow'):
-                #        pass
-
 	def do_GET(self):
 		args = parse_qs(urlparse(self.path).query)
 		msg = args['MSG'][0]
@@ -196,10 +210,11 @@ class ServiceServer(BaseHTTPRequestHandler):
 def startServiceAccess(port):
 	webServer = HTTPServer(("localhost", port), ServiceServer)
 	try:
-		webServer.serve_forever()
+		while doService: webServer.handle_request()
 	except:
 		pass
 	webServer.server_close()
+	sys.exit()
 
 t1 = threading.Thread(target=startTCPConnection, args=(port1, port2,))
 t2 = threading.Thread(target=startTCPConnection, args=(port2, port1,))
@@ -212,6 +227,7 @@ t2.start()
 t3.start()
 t4.start()
 t5.start()
+
 t1.join()
 t2.join()
 t3.join()
