@@ -89,19 +89,27 @@ class UDPSocket:
 		self.port = port
 		self.address = None
 		self.state = 'instanciated'
+		self.bound = False
 
-		log(' start UDP socket on: '+serverIP+':'+str(port)+', timeout after '+str(acceptTimeout)+' s')
+		log(' start UDP socket on: '+IP+':'+str(port)+', timeout after '+str(acceptTimeout)+' s')
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
 
 		try:
 			self.state = 'binding'
-			sock.bind((IP, port))
-		except:
-			log('  bind socket on '+str(port)+' failed!')
+			self.sock.bind((IP, port))
+			self.bound = True
+		except Exception as e:
+			log('  bind socket on '+IP+':'+str(port)+' failed! '+str(e))
 			self.state = 'bind failed'
 
+	def close(self):
+		log('close UDP socket')
+		self.sock.sendto( '', ('0.0.0.0', self.port) )
+
 	def listen(self, callback):
+		if not self.bound: return
+
 		try:
 			while True: # Receive the data in small chunks and retransmit it
 				self.state = 'listening'
@@ -216,6 +224,8 @@ def startServiceAccess(port):
 	except:
 		pass
 	log(' close server')
+	for port, sock in connectionMap.items():
+		sock.close()
 	webServer.server_close()
 
 t1 = threading.Thread(target=startTCPConnection, args=(port1, port2,))
@@ -224,16 +234,16 @@ t3 = threading.Thread(target=startUDPConnection, args=(port3, port4,))
 t4 = threading.Thread(target=startUDPConnection, args=(port4, port3,))
 t5 = threading.Thread(target=startServiceAccess, args=(portS,))
 
-t1.start()
-t2.start()
-#t3.start()
-#t4.start()
+#t1.start()
+#t2.start()
+t3.start()
+t4.start()
 t5.start()
 
-t1.join()
-t2.join()
-#t3.join()
-#t4.join()
+#t1.join()
+#t2.join()
+t3.join()
+t4.join()
 t5.join()
 log('  done')
 os.remove('sessions/'+sessionFile)
