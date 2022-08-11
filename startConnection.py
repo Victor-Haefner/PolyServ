@@ -179,25 +179,24 @@ class TCPSocket:
 
                 try:
                         self.connection, self.address = self.sock.accept()
-                        connectionMap[port] = connection
                         sleep(0.2)
 
                         try:
                                 while True: # Receive the data in small chunks and retransmit it
                                         self.state = 'receiving'
-                                        connection.settimeout(recvTimeout)
-                                        data = connection.recv(256)
+                                        self.connection.settimeout(recvTimeout)
+                                        data = self.connection.recv(256)
                                         if data: 
                                                 #log(' got "'+str(len(data))+'" on port: '+str(port))
                                                 if callback: callback(data)
                                         else: break
                                 self.state = 'finished'
                         except Exception as e:
-                                log(' connection recv timeout on '+str(port)+' with: '+str(e))
+                                log(' connection recv timeout on '+str(self.port)+' with: '+str(e))
 				self.state = 'exception: '+str(e)
                         finally:
-                                connection.close()
-                                log(' connection closed on '+str(port))
+                                self.connection.close()
+                                log(' connection closed on '+str(self.port))
                 except Exception as e:
 			self.state = 'exception: '+str(e)
                         log('socket accept timed out! '+str(e))
