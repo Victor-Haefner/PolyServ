@@ -95,10 +95,14 @@
 
 		function delBridge() { 
 			var path = selectedBridge.path;
-			console.log(path);
+			//console.log(path);
 			var res = req("remSession.php?PATH="+path);
-			console.log("delBridge:");
-			console.log(res); 
+			//console.log("delBridge:");
+			//console.log(res); 
+		};
+
+		function cleanup() {
+			req("cleanup.php"); 
 		};
 
 		function testTCP() { ; };
@@ -285,6 +289,7 @@
 		<button onclick='delRoom()' disabled>Del<br/>Room</button>
                 <button onclick='delUser()'>Del<br/>User</button>
                 <button onclick='delBridge()'>Del<br/>Bridge</button>
+		<button onclick='cleanup()'>Full<br/>Cleanup</button>
 
 		<button onclick='testTCP()'>Send<br/>TCP<br/>packet</button>
                 <button onclick='testUDP()'>Send<br/>UDP<br/>packet</button>
