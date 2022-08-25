@@ -57,12 +57,14 @@
 
 
 		function req(uri) {
-			//console.log(window.location);
-			uri = window.location.href + "../" + uri;
+			var href = window.location.href;
+			var dir = href.substring(0, href.lastIndexOf('/')) + "/";
+			uri = dir + "../" + uri;
 			//console.log(uri);
 			var xmlHttp = new XMLHttpRequest();
                         xmlHttp.open( "GET", uri, false ); // false for synchronous request
                         xmlHttp.send( null );
+			if (!xmlHttp.state) return "";
                         return xmlHttp.responseText;
 		}
 
